@@ -1,44 +1,88 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
-public class GameManager : MonoBehaviour
+// ############ Movement.cs
+usingusingusingSystem.Data;
+UnityEditor;
+UnityEngine;
+public class Movement : MonoBehaviour
 {
-// Start is called before the first frame update
-int score=0;
-int old_score=0;
-SaveDataval obj = new SaveDataval();
+Rigidbody2D rb;
+bool isGrounded = true;
+public float speed = 10f;
+public float jumpheight = 100f;
+// Start is called once before the first execution of Update after the MonoBehaviour is created
+void Start()
+{
+rb = GetComponent<Rigidbody2D>();
+}
+// Update is called once per frame
+void Update()
+{
+float x= Input.GetAxisRaw("Horizontal");
+if(x>0){
+rb.Velocity = new Vector2(speed*Time.deltaTime,rb.Velocity.y);
+}
+else if (x<0){
+rb.Velocity = new Vector2(-speed*Time.deltaTime,rb.Velocity.y);
+}
+if(Input.GetKeyDown(KeyCode.Space)&&isGrounded){
+rb.Velocity = new Vector2(rb.Velocity.x,jumpheight*Time.deltaTime);
+}
+}
+}
+// ############ Coin.cs
+using UnityEngine;
+public class Playercoin : MonoBehaviour
+{
+int score = 10;
+Gamemanager gm;
+// Start is called once before the first execution of Update after the MonoBehaviour is created
+void Start()
+{
+gm = FindAnyObjectByType<Gamemanager>();
+}
+// Update is called once per frame
+void OnTriggerEnter2D(Collider2D other){
+if(other.tag == "Player"){
+gm.AddCoin(score);
+Destroy(gameObject);
+}
+}
+}
+// ############## Gamemanger.cs
+usingusingusingusingusingUnityEngine;
+System.Collections;
+System.Collections.Generic;
+System.IO;
+UnityEditor.Overlays;
+public class Gamemanager : MonoBehaviour
+{
+int score =0;
+int old_score =10;
 string json;
+SaveDataval obj = new SaveDataval();
+// Start is called once before the first execution of Update after the MonoBehaviour is created
 void Start()
 {
 LoadData();
 }
-public void AddCoin(int value)
-{
-score=score+value;
-Debug.Log($"New score: {score}");
+// Update is called once per frame
+public void AddCoin(int value){
+score = score +value;
+Debug.Log(score);
 SaveGameData();
 }
-void SaveGameData()
-{
+}
+void SaveGameData(){
 obj.score = score;
-//to create Json
 json = JsonUtility.ToJson(obj);
-Debug.Log(json);//to display json in log
-File.WriteAllText(Application.dataPath + "MyJsonFile.json",
-json);
+Debug.Log(json);
+File.WriteAllText(Application.dataPath+"Myfile.json",json);
 Debug.Log(Application.dataPath.ToString());
 }
-void LoadData()
-{
-string json =
-File.ReadAllText(Application.dataPath+"MyJsonFile.json");
+void LoadData(){
+string json = File.ReadAllText(Application.dataPath+"Myfile.json");
 obj = JsonUtility.FromJson<SaveDataval>(json);
-old_score = obj.score;
-Debug.Log($"Old score: {old_score}");
+Debug.Log(old_score);
 }
-class SaveDataval
-{
+class SaveDataval{
 public int score;
-}
 }
